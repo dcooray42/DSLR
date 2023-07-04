@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from math import ceil, floor
 
@@ -72,7 +73,7 @@ def create_matrix_string(matrix, column_names) :
     for index, value in enumerate(column_names) :
         string_arr = value.split(" ")
         if len(string_arr) != 1 :
-            column_names[index] = "".join(string[0] for string in string_arr)   
+            column_names[index] = "".join(string[0] for string in string_arr)
     matrix = np.round(matrix, decimals=2)
     left_column = [
         "Count",
@@ -89,7 +90,6 @@ def create_matrix_string(matrix, column_names) :
     matrix_string = ""
     matrix_size = np.zeros(matrix.shape[1]).astype(int)
     matrix_max_len = np.max(np.char.str_len(matrix.astype(str)), axis=0)
-    print(matrix_size.shape)
     for index in range(matrix_size.shape[0]) :
         matrix_size[index] = max(len(column_names[index]), matrix_max_len[index])
     for index_row in range(matrix.shape[0] + 1) :
@@ -97,7 +97,8 @@ def create_matrix_string(matrix, column_names) :
             matrix_string += "".ljust(left_column_max_len) + "".join([value.rjust(matrix_size[index] + 2) for index, value in enumerate(column_names)])
         else :
             matrix_string += left_column[index_row - 1].ljust(left_column_max_len) + "".join([str(value).rjust(matrix_size[index] + 2) for index, value in enumerate(matrix[index_row - 1, :])])
-        matrix_string += "\n"
+        if index_row != matrix.shape[0]:
+            matrix_string += "\n"
     return matrix_string
     
 def describe(features, column_names) :
@@ -154,12 +155,17 @@ def filter_features(features) :
     return column_names[numerical_index], numerical_data
     
 def main() :
-    try :
-        arr = np.loadtxt("dataset_train.csv", delimiter=",", dtype=str)
-    except :
-        return
-    column_names, features = filter_features(arr)
-    describe(features, column_names)
+    if len(sys.argv) == 2 :
+        try :
+            arr = np.loadtxt(sys.argv[1], delimiter=",", dtype=str)
+        except :
+            print("Invalid csv")
+            print("Usage : python3 describe.py [.csv]")
+            return
+        column_names, features = filter_features(arr)
+        describe(features, column_names)
+    else :
+        print("Usage : python3 describe.py [.csv]")
 
 
 if "__main__" == __name__ :
