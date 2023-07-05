@@ -70,10 +70,6 @@ class TinyStatistician :
         return float(self.var(array) ** (1 / 2))
 
 def create_matrix_string(matrix, column_names) :
-    for index, value in enumerate(column_names) :
-        string_arr = value.split(" ")
-        if len(string_arr) != 1 :
-            column_names[index] = "".join(string[0] for string in string_arr)
     matrix = np.round(matrix, decimals=2)
     left_column = [
         "Count",
@@ -145,11 +141,12 @@ def filter_features(features) :
             mask = current_col == ""
             current_col = current_col[~mask]
             np.array(current_col).astype(float)
-            if numerical_data.size == 0 :
-                numerical_data = np.array(np.array(features[:, index_col])).reshape(-1, 1)
-            else :
-                numerical_data = np.append(numerical_data, np.array(np.array(features[:, index_col])).reshape(-1, 1), axis=1)
-            numerical_index.append(index_col)
+            if current_col.size :
+                if numerical_data.size == 0 :
+                    numerical_data = np.array(np.array(features[:, index_col])).reshape(-1, 1)
+                else :
+                    numerical_data = np.append(numerical_data, np.array(np.array(features[:, index_col])).reshape(-1, 1), axis=1)
+                numerical_index.append(index_col)
         except :
             pass
     return column_names[numerical_index], numerical_data
@@ -166,7 +163,6 @@ def main() :
         describe(features, column_names)
     else :
         print("Usage : python3 describe.py [.csv]")
-
 
 if "__main__" == __name__ :
     main()
