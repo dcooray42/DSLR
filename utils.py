@@ -196,7 +196,7 @@ def scatter_plot(features, column_names, target) :
             plt.show()
 
 def pair_plot(features, column_names, target) :
-    fig, axs = plt.subplots(features.shape[1], features.shape[1], gridspec_kw={"height_ratios": [1 for _ in range(features.shape[1] - 1)] + [0.2]})
+    fig, axs = plt.subplots(features.shape[1], features.shape[1], gridspec_kw={"height_ratios": [1 for _ in range(features.shape[1])]})
     plt.show()
 #    arr = np.append(target.reshape(-1, 1), features, axis=1)
 #    if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
