@@ -1,29 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from utils import TinyStatistician
 
 def histogram(features, column_names, target) :
-    ts = TinyStatistician()
-    x = np.arange(1, len(column_names) + 1)
     arr = np.append(target.reshape(-1, 1), features, axis=1)
-    indent = [-0.3, -0.1, 0.1, 0.3]
-    for index, house in enumerate(sorted(set(target))) :
-        data = arr[arr[:, 0] == house][:, 1:]
-        mean_arr = []
-        for index_col in range(data.shape[1]) :
+    for index_col in range(arr.shape[1] - 1) :
+        plt.figure()
+        for house in sorted(set(target)) :
+            data = arr[arr[:, 0] == house][:, 1:]
             current_col = np.array(data[:, index_col])
             mask = current_col == ""
             current_col = current_col[~mask]
-            mean_arr.append(ts.mean(current_col))
-        plt.bar(x + indent[index], np.array(np.log10(mean_arr)), width=0.2, label=house)
-    plt.xlabel("Course")
-    plt.ylabel("Mean")
-    plt.yscale("log")
-    plt.title("Histogram of the mean of each course by houses")
-    plt.xticks(x, column_names, rotation=20)
-    plt.legend(loc="upper right", title="Houses")
-    plt.show()
+            plt.hist(np.array(current_col).astype(float), bins=30, alpha=.5, label=house)
+        plt.xlabel("Score")
+        plt.ylabel("Percentage of student")
+        plt.title(f"Histogram of the score of each house for the course {column_names[index_col]}")
+        plt.legend(loc="upper right", title="Houses")
+        plt.show()
 
 def filter_features(features) :
     column_names = features[0]
@@ -53,9 +46,7 @@ def main() :
             print("Invalid csv")
             print("Usage : python3 histogram.py [.csv]")
             return
-        print(arr.shape)
         target = arr[1:, 0]
-        print(target[:10])
         column_names, features = filter_features(arr)
         histogram(features, column_names, target)
     else :
