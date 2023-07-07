@@ -4,6 +4,9 @@ import sys
 
 def histogram(features, column_names, target) :
     arr = np.append(target.reshape(-1, 1), features, axis=1)
+    if arr[arr[:, 0] == ""].shape[1] == arr.shape[1] :
+        print("The target column is empty.")
+        return
     for index_col in range(arr.shape[1] - 1) :
         plt.figure()
         for house in sorted(set(target)) :
