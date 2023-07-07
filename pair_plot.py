@@ -1,4 +1,4 @@
-from utils import filter_features, histogram
+from utils import filter_features, pair_plot
 import numpy as np
 import sys
 
@@ -12,7 +12,7 @@ def main() :
             return
         target = arr[1:, 0]
         column_names, features = filter_features(arr)
-        histogram(features, column_names, target)
+        pair_plot(features, column_names, target)
     else :
         print("Usage : python3 historgram.py [.csv]")
 
