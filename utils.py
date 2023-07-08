@@ -191,54 +191,54 @@ def scatter_plot(features, column_names, target) :
                     label=house)
             plt.xlabel(column_names[index_col_one])
             plt.ylabel(column_names[index_col_two])
-            plt.title(f"Scatter ploat of each house for {column_names[index_col_two]} in function of {column_names[index_col_one]}")
+            plt.title(f"{index_col_one} {index_col_two} Scatter ploat of each house for {column_names[index_col_two]} in function of {column_names[index_col_one]}")
             plt.legend(loc="upper right", title="Houses")
             plt.show()
 
 def pair_plot(features, column_names, target) :
-    fig, axs = plt.subplots(features.shape[1], features.shape[1], gridspec_kw={"height_ratios": [1 for _ in range(features.shape[1])]})
+    arr = np.append(target.reshape(-1, 1), features, axis=1)
+    if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
+        print("The target column is empty.")
+        return
+    column_index = [1, 2, 3, 6, 11]
+    fig, axs = plt.subplots(len(column_index) + 1,
+                            len(column_index),
+                            gridspec_kw={
+                                "height_ratios": [1 for _ in range(len(column_index))] + [0.2]
+                            }
+                            )
+    for y_index, y_col_index in enumerate(column_index):
+        axs[y_index, 0].set_ylabel(column_names[y_col_index], rotation=80)
+    for x_index, x_col_index in enumerate(column_index):
+        axs[len(column_index)-1, x_index].set_xlabel(column_names[x_col_index])
+    for y_index, y_col_index in enumerate(column_index) :
+        for x_index, x_col_index in enumerate(column_index) :
+            if y_index == x_index :
+                for house in sorted(set(target)) :
+                    data = arr[arr[:, 0] == house][:, 1:]
+                    current_col = np.array(data[:, x_col_index])
+                    current_col = np.where(current_col == "", np.nan, current_col)
+                    axs[y_index, x_index].hist(np.array(current_col).astype(float), bins=30, alpha=.5, label=house)
+            else :
+                for house in sorted(set(target)) :
+                    data = arr[arr[:, 0] == house][:, 1:]
+                    current_col_one = np.array(data[:, x_col_index])
+                    current_col_two = np.array(data[:, y_col_index])
+                    current_col_one = np.where(current_col_one == "", np.nan, current_col_one)
+                    current_col_two = np.where(current_col_two == "", np.nan, current_col_two)
+                    axs[y_index, x_index].scatter(
+                        np.array(current_col_one).astype(float),
+                        np.array(current_col_two).astype(float),
+                        alpha=.5,
+                        label=house)
+    fig.text(0.5, 0.04, "Features", ha="center", va="center")
+    fig.text(0.03, 0.5, "Features", ha="center", va="center", rotation="vertical")
+    fig.suptitle("Pair plots of the features used for the logistic regression", fontsize=30)
+    legend_ax = axs[-1]
+    for graph in legend_ax :
+        graph.axis("off")
+    handles, labels = axs[0, 0].get_legend_handles_labels()
+    legend_ax[int(len(column_index) / 2)].legend(handles, labels, loc="center", ncol=4, title="Houses", bbox_to_anchor=(0.5, -3.0))
+    plt.subplots_adjust(left=0.1, right=0.9, bottom=0.2, top=0.9, wspace=0.3, hspace=0.3)
     plt.show()
-#    arr = np.append(target.reshape(-1, 1), features, axis=1)
-#    if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
-#        print("The target column is empty.")
-#        return
-#    for index_col_one in range(arr.shape[1] - 1) :
-#        for index_col_two in range(index_col_one + 1, arr.shape[1] - 1) :
-#            plt.figure()
-#            for house in sorted(set(target)) :
-#                data = arr[arr[:, 0] == house][:, 1:]
-#                current_col_one = np.array(data[:, index_col_one])
-#                current_col_two = np.array(data[:, index_col_two])
-#                current_col_one = np.where(current_col_one == "", np.nan, current_col_one)
-#                current_col_two = np.where(current_col_two == "", np.nan, current_col_two)
-#                plt.scatter(
-#                    np.array(current_col_one).astype(float),
-#                    np.array(current_col_two).astype(float),
-#                    alpha=.5,
-#                    label=house)
-#            plt.xlabel(column_names[index_col_one])
-#            plt.ylabel(column_names[index_col_two])
-#            plt.title(f"Scatter ploat of each house for {column_names[index_col_two]} in function of {column_names[index_col_one]}")
-#            plt.legend(loc="upper right", title="Houses")
-#            plt.show()
-#
-#    fig, axs = plt.subplots(features.shape[1], features.shape[1], gridspec_kw={"height_ratios": [1, 1, 1, 1, 0.2]})
-#    for lambda_, lambda_dict in y.items() :
-#            for feature, y_values in lambda_dict.items() :
-#                y_values = np.array(y_values)
-#                axs[int(feature)].scatter(
-#                    x_values,
-#                    y_values,
-#                    label=str(round(float(lambda_), 2))
-#                )
-#    for ax in axs[:-1].flatten():
-#        ax.grid(True)
-#    fig.text(0.5, 0.04, "Algorithm", ha="center", va="center")
-#    fig.text(0.06, 0.5, "F1 score", ha="center", va="center", rotation="vertical")
-#    legend_ax = axs[-1]
-#    handles, labels = axs[0].get_legend_handles_labels()
-#    legend_ax.axis("off")
-#    legend_ax.legend(handles, labels, loc="center", ncol=3, title="Lambda")
-#    plt.subplots_adjust(hspace=0.4)
-#    plt.show()
-#    plt.close()
+    plt.close()
