@@ -210,14 +210,14 @@ def logreg_train(features, target) :
     arr = arr[~row_mask]
     features = arr[:, 1:]
     target = arr[:, 0]
+    for index_col in range(features.shape[1]) :
+        features[:, index_col] = zscore(features[:, index_col])
+    unique_target_values = sorted(set(target))
     data = {
         "unique_target_values" : unique_target_values,
         "zscore_features" : features,
         "column_selected" : column_index
     }
-    for index_col in range(features.shape[1]) :
-        features[:, index_col] = zscore(features[:, index_col])
-    unique_target_values = sorted(set(target))
     for index, value in enumerate(unique_target_values) :
         target[target[:] == value] = index
     target = target.astype(float)
@@ -255,9 +255,8 @@ def logreg_train(features, target) :
         lr = MyLogisticRegression(np.zeros(len(column_index) + 1), alpha=1e-1, max_iter=500, lambda_=lambda_)
         target[:, 1] = np.ones(target.shape[0])
         target[target[:, 0] != target_value, 1] = 0
-        print(target[:10])
         data[target_value]["thetas"] = lr.fit_(features, target[:, 1])
     print(data)
 
-#    with open("models.pickle", "wb") as f:
-#        pickle.dump(summary_data, f)
+    with open("models.pkl", "wb") as f:
+        pickle.dump(data, f)
