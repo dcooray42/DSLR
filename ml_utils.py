@@ -152,15 +152,16 @@ def zscore(x) :
         return None
     return (X - np.mean(X)) / np.std(X)
 
-def zscore_one(value, x) :   
-    if type(x).__module__ != np.__name__ :
-            return None
-    if x.size <= 0 :
+def zscore_ori(x, x_ori) :   
+    if type(x).__module__ != np.__name__ or type(x_ori).__module__ != np.__name__ :
+        return None
+    if x.size <= 0 or x_ori.size <= 0 :
         return None
     X = np.squeeze(x).astype(float)
-    if X.ndim != 1 :
+    X_ori = x_ori.astype(float)
+    if X.ndim != 1 or X_ori.ndim != 1 :
         return None
-    return (value - np.mean(X)) / np.std(X)
+    return (X - np.mean(X_ori)) / np.std(X_ori)
 
 def precision_score_(y, y_hat, pos_label=1) :
     if type(y).__module__ != np.__name__ or type(y_hat).__module__ != np.__name__ :
@@ -210,14 +211,14 @@ def logreg_train(features, target) :
     arr = arr[~row_mask]
     features = arr[:, 1:]
     target = arr[:, 0]
-    for index_col in range(features.shape[1]) :
-        features[:, index_col] = zscore(features[:, index_col])
     unique_target_values = sorted(set(target))
     data = {
         "unique_target_values" : unique_target_values,
-        "zscore_features" : features,
+        "zscore_features" : arr[:, 1:].copy(),
         "column_selected" : column_index
     }
+    for index_col in range(features.shape[1]) :
+        features[:, index_col] = zscore(features[:, index_col])
     for index, value in enumerate(unique_target_values) :
         target[target[:] == value] = index
     target = target.astype(float)
@@ -260,3 +261,38 @@ def logreg_train(features, target) :
 
     with open("models.pkl", "wb") as f:
         pickle.dump(data, f)
+
+def logreg_predict(features, target, data) :
+    column_index = data["column_selected"]
+    arr = np.append(target.reshape(-1, 1),
+                    np.where(features == "", np.nan, features)[:, column_index].astype(float),
+                    axis=1)
+    if arr[arr[:, 0] == ""].shape[0] != arr.shape[0] :
+        print("The target column isn't empty.")
+        return
+    nan_mask = np.isnan(arr[:, 1:].astype(float))
+    row_mask = np.logical_or(nan_mask.any(axis=1), np.char.isdigit(arr[:, 0]))
+    arr = arr[~row_mask]
+    features = arr[:, 1:]
+    y_length = arr[:, 0].shape[0]
+    if features.shape[1] != len(data["column_selected"]) :
+        print("The original features passed in the pickle file have a different x_shape than the current features.")
+        return
+    for index_col in range(features.shape[1]) :
+        features[:, index_col] = zscore_ori(features[:, index_col], data["zscore_features"][:, index_col])
+    unique_target_values = data["unique_target_values"]
+    y_predict = np.c_[np.zeros(y_length), np.zeros(y_length)]
+    for target_value in range(len(unique_target_values)) :
+        lr = MyLogisticRegression(data[target_value]["thetas"],
+                                  lambda_=data[target_value]["lambda"])
+        y_hat = lr.predict_(features).flatten()
+        y_predict[y_predict[:, 1] < y_hat, 0] = target_value
+        y_predict[y_predict[:, 1] < y_hat, 1] = y_hat[y_predict[:, 1] < y_hat]
+    final_string = "Index,Hogwarts House\n"
+    for index in range(y_predict.shape[0]) :
+        final_string += f"{int(index)},{unique_target_values[int(y_predict[int(index), 0])]}"
+        if index != y_predict.shape[0] - 1 :
+            final_string += "\n"
+    
+    with open("houses.csv", "w") as f :
+        f.write(final_string)

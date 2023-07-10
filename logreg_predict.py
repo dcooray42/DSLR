@@ -16,7 +16,7 @@ def main() :
             return
         target = arr[1:, 0]
         column_names, features = filter_features(arr)
-        logreg_predict(features, data)
+        logreg_predict(features, target, data)
     else :
         print("Usage : python3 logreg_train.py [.csv] [.pkl]")
 
