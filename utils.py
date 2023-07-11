@@ -69,6 +69,41 @@ class TinyStatistician :
         array = np.squeeze(array).astype(float) if array.shape != (1, 1) else array.flatten().astype(float)
         return float(self.var(array) ** (1 / 2))
     
+    def count(self, array) :
+        if type(array).__module__ != np.__name__ :
+                return None
+        if array.size <= 0 :
+            return None
+        array = np.squeeze(array).astype(float) if array.shape != (1, 1) else array.flatten().astype(float)
+        cnt = 0
+        for _ in range(len(array)) :
+            cnt += 1
+        return float(cnt)
+    
+    def min(self, array) :
+        if type(array).__module__ != np.__name__ :
+                return None
+        if array.size <= 0 :
+            return None
+        array = np.squeeze(array).astype(float) if array.shape != (1, 1) else array.flatten().astype(float)
+        min_val = float("+inf")
+        for val in array :
+            if val < min_val :
+                min_val = val
+        return float(min_val)
+    
+    def max(self, array) :
+        if type(array).__module__ != np.__name__ :
+                return None
+        if array.size <= 0 :
+            return None
+        array = np.squeeze(array).astype(float) if array.shape != (1, 1) else array.flatten().astype(float)
+        max_val = float("-inf")
+        for val in array :
+            if val > max_val :
+                max_val = val
+        return float(max_val)
+    
 def filter_features(features) :
     column_names = features[0]
     features = features[1:]
@@ -121,14 +156,14 @@ def create_matrix_string(matrix, column_names) :
 def describe(features, column_names) :
     ts = TinyStatistician()
     function_list = [
-        np.size,
+        ts.count,
         ts.mean,
         ts.var,
         ts.std,
-        np.min,
+        ts.min,
         ts.quartile,
         ts.median,
-        np.max
+        ts.max
     ]
     matrix_values = np.array([])
     for index_col in range(features.shape[1]) :
