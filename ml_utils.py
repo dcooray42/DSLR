@@ -206,9 +206,6 @@ def logreg_train(features, target) :
     if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
         print("The target column is empty.")
         return
-#    nan_mask = np.isnan(arr[:, 1:].astype(float))
-#    row_mask = np.logical_or(nan_mask.any(axis=1), np.char.isdigit(arr[:, 0]))
-#    arr = arr[~row_mask]
     features = arr[:, 1:]
     target = arr[:, 0]
     unique_target_values = sorted(set(target))
