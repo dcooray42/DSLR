@@ -187,8 +187,9 @@ def describe(features, column_names) :
     print(create_matrix_string(matrix_values, column_names))
 
 def histogram(features, column_names, target) :
-    index_col = list(column_names).index("Care of Magical Creatures")
-    if index_col == -1 :
+    try :
+        index_col = list(column_names).index("Care of Magical Creatures")
+    except :
         print("The attended column isn't present in the dataset.")
         return
     arr = np.append(target.reshape(-1, 1), features, axis=1)
@@ -209,29 +210,33 @@ def histogram(features, column_names, target) :
     plt.show()
 
 def scatter_plot(features, column_names, target) :
+    try :
+        index_col_one = list(column_names).index("Astronomy")
+        index_col_two = list(column_names).index("Defense Against the Dark Arts")
+    except :
+        print("The attended column isn't present in the dataset.")
+        return
     arr = np.append(target.reshape(-1, 1), features, axis=1)
     if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
         print("The target column is empty.")
         return
-    for index_col_one in range(arr.shape[1] - 1) :
-        for index_col_two in range(index_col_one + 1, arr.shape[1] - 1) :
-            plt.figure()
-            for house in sorted(set(target)) :
-                data = arr[arr[:, 0] == house][:, 1:]
-                current_col_one = np.array(data[:, index_col_one])
-                current_col_two = np.array(data[:, index_col_two])
-                current_col_one = np.where(current_col_one == "", np.nan, current_col_one)
-                current_col_two = np.where(current_col_two == "", np.nan, current_col_two)
-                plt.scatter(
-                    np.array(current_col_one).astype(float),
-                    np.array(current_col_two).astype(float),
-                    alpha=.5,
-                    label=house)
-            plt.xlabel(column_names[index_col_one])
-            plt.ylabel(column_names[index_col_two])
-            plt.title(f"{index_col_one} {index_col_two} Scatter ploat of each house for {column_names[index_col_two]} in function of {column_names[index_col_one]}")
-            plt.legend(loc="upper right", title="Houses")
-            plt.show()
+    plt.figure()
+    for house in sorted(set(target)) :
+        data = arr[arr[:, 0] == house][:, 1:]
+        current_col_one = np.array(data[:, index_col_one])
+        current_col_two = np.array(data[:, index_col_two])
+        current_col_one = np.where(current_col_one == "", np.nan, current_col_one)
+        current_col_two = np.where(current_col_two == "", np.nan, current_col_two)
+        plt.scatter(
+            np.array(current_col_one).astype(float),
+            np.array(current_col_two).astype(float),
+            alpha=.5,
+            label=house)
+    plt.xlabel(column_names[index_col_one])
+    plt.ylabel(column_names[index_col_two])
+    plt.title(f"Scatter ploat of each house for {column_names[index_col_two]} in function of {column_names[index_col_one]}")
+    plt.legend(loc="upper right", title="Houses")
+    plt.show()
 
 def pair_plot(features, column_names, target) :
     arr = np.append(target.reshape(-1, 1), features, axis=1)
