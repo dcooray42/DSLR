@@ -187,23 +187,26 @@ def describe(features, column_names) :
     print(create_matrix_string(matrix_values, column_names))
 
 def histogram(features, column_names, target) :
+    index_col = list(column_names).index("Care of Magical Creatures")
+    if index_col == -1 :
+        print("The attended column isn't present in the dataset.")
+        return
     arr = np.append(target.reshape(-1, 1), features, axis=1)
     if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
         print("The target column is empty.")
         return
-    for index_col in range(arr.shape[1] - 1) :
-        plt.figure()
-        for house in sorted(set(target)) :
-            data = arr[arr[:, 0] == house][:, 1:]
-            current_col = np.array(data[:, index_col])
-            mask = current_col == ""
-            current_col = current_col[~mask]
-            plt.hist(np.array(current_col).astype(float), bins=30, alpha=.5, label=house)
-        plt.xlabel("Score")
-        plt.ylabel("Percentage of student")
-        plt.title(f"Histogram of the score of each house for the course {column_names[index_col]}")
-        plt.legend(loc="upper right", title="Houses")
-        plt.show()
+    plt.figure()
+    for house in sorted(set(target)) :
+        data = arr[arr[:, 0] == house][:, 1:]
+        current_col = np.array(data[:, index_col])
+        mask = current_col == ""
+        current_col = current_col[~mask]
+        plt.hist(np.array(current_col).astype(float), bins=30, alpha=.5, label=house)
+    plt.xlabel("Score")
+    plt.ylabel("Percentage of student")
+    plt.title(f"Histogram of the score of each house for the course {column_names[index_col]}")
+    plt.legend(loc="upper right", title="Houses")
+    plt.show()
 
 def scatter_plot(features, column_names, target) :
     arr = np.append(target.reshape(-1, 1), features, axis=1)
