@@ -201,14 +201,14 @@ def f1_score_(y, y_hat, pos_label=1) :
 def logreg_train(features, target) :
     column_index = [1, 2, 3, 6, 11]
     arr = np.append(target.reshape(-1, 1),
-                    np.where(features == "", np.nan, features)[:, column_index].astype(float),
+                    np.where(features == "", "0", features)[:, column_index].astype(float),
                     axis=1)
     if arr[arr[:, 0] == ""].shape[0] == arr.shape[0] :
         print("The target column is empty.")
         return
-    nan_mask = np.isnan(arr[:, 1:].astype(float))
-    row_mask = np.logical_or(nan_mask.any(axis=1), np.char.isdigit(arr[:, 0]))
-    arr = arr[~row_mask]
+#    nan_mask = np.isnan(arr[:, 1:].astype(float))
+#    row_mask = np.logical_or(nan_mask.any(axis=1), np.char.isdigit(arr[:, 0]))
+#    arr = arr[~row_mask]
     features = arr[:, 1:]
     target = arr[:, 0]
     unique_target_values = sorted(set(target))
@@ -265,14 +265,11 @@ def logreg_train(features, target) :
 def logreg_predict(features, target, data) :
     column_index = data["column_selected"]
     arr = np.append(target.reshape(-1, 1),
-                    np.where(features == "", np.nan, features)[:, column_index].astype(float),
+                    np.where(features == "", "0", features)[:, column_index].astype(float),
                     axis=1)
     if arr[arr[:, 0] == ""].shape[0] != arr.shape[0] :
         print("The target column isn't empty.")
         return
-    nan_mask = np.isnan(arr[:, 1:].astype(float))
-    row_mask = np.logical_or(nan_mask.any(axis=1), np.char.isdigit(arr[:, 0]))
-    arr = arr[~row_mask]
     features = arr[:, 1:]
     y_length = arr[:, 0].shape[0]
     if features.shape[1] != len(data["column_selected"]) :
