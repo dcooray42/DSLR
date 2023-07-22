@@ -20,7 +20,7 @@ class MyLogisticRegression():
         self.penality = penality
         self.lambda_ = lambda_ if penality in self.supported_penalities else 0.0
 
-    def fit_(self, x, y) :
+    def fit_(self, x, y, batch_size) :
 
         def gradient(x, y, theta) :
 
@@ -60,9 +60,21 @@ class MyLogisticRegression():
         Theta = np.squeeze(self.thetas).astype(float) if self.thetas.shape != (1, 1) else self.thetas.flatten().astype(float)
         if Y.ndim != 1 or Theta.ndim != 1 or X.shape[0] != Y.shape[0] or X.shape[1] + 1 != Theta.shape[0] :
             return None
+        n = y.shape[0]
         for _ in range(self.max_iter) :
-            gradient_descent = gradient(X, Y, Theta)
-            Theta -= self.alpha * gradient_descent.squeeze()
+            if batch_size > 0 and batch_size < n :
+                self.alpha = 1e-4
+                r_indexes = np.arange(n)
+                np.random.shuffle(r_indexes)
+                X_rand = X[r_indexes]
+                Y_rand = Y[r_indexes]
+                mini_batches = [tuple((X_rand[k : k + batch_size], Y_rand[k : k + batch_size])) for k in np.arange(0, n, batch_size)]
+            else :
+                mini_batches = [tuple((X, Y))]
+            for mini_batch in mini_batches:
+                x_batch, y_batch = mini_batch
+                gradient_descent = gradient(x_batch, y_batch, Theta)
+                Theta -= self.alpha * gradient_descent.squeeze()
         self.thetas = Theta.reshape(-1, 1)
         return self.thetas
     
@@ -198,7 +210,7 @@ def f1_score_(y, y_hat, pos_label=1) :
     recall = recall_score_(y, y_hat, pos_label)
     return (2 * precision * recall) / (precision + recall)
 
-def logreg_train(features, target) :
+def logreg_train(features, target, batch_size) :
     column_index = [1, 2, 3, 6, 11]
     arr = np.append(target.reshape(-1, 1),
                     np.where(features == "", "0", features)[:, column_index].astype(float),
@@ -236,7 +248,7 @@ def logreg_train(features, target) :
             lr = MyLogisticRegression(np.zeros(len(column_index) + 1), alpha=1e-1, max_iter=500, lambda_=lambda_)
             y_train[:, 1] = np.ones(y_train.shape[0])
             y_train[y_train[:, 0] != target_value, 1] = 0
-            save_thetas[target_value] = lr.fit_(x_train, y_train[:, 1])
+            save_thetas[target_value] = lr.fit_(x_train, y_train[:, 1], batch_size)
             y_hat = lr.predict_(x_test).flatten()
             y_predict[y_predict[:, 1] < y_hat, 0] = target_value
             y_predict[y_predict[:, 1] < y_hat, 1] = y_hat[y_predict[:, 1] < y_hat]
@@ -253,7 +265,7 @@ def logreg_train(features, target) :
         lr = MyLogisticRegression(np.zeros(len(column_index) + 1), alpha=1e-1, max_iter=500, lambda_=lambda_)
         target[:, 1] = np.ones(target.shape[0])
         target[target[:, 0] != target_value, 1] = 0
-        data[target_value]["thetas"] = lr.fit_(features, target[:, 1])
+        data[target_value]["thetas"] = lr.fit_(features, target[:, 1], batch_size)
     print(data)
 
     with open("models.pkl", "wb") as f:
