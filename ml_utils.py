@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+from utils import TinyStatistician
 
 class MyLogisticRegression():
     supported_penalities = ["l2"]
@@ -130,6 +131,8 @@ class MyLogisticRegression():
         Y_hat = Y_hat.reshape(Y_hat.shape[0], 1)
         result = ((Y.dot(np.log(Y_hat)) + (vec_ones.reshape(1, vec_ones.shape[0]) - Y).dot(np.log(vec_ones - Y_hat))) / (-Y_hat.shape[0])) + ((self.lambda_ * l2(Theta)) / (2 * Y_hat.shape[0]))
         return np.squeeze(result)
+    
+ts = TinyStatistician()
 
 def data_spliter(x, y, proportion) :
     if type(x).__module__ != np.__name__ or type(y).__module__ != np.__name__ :
@@ -162,7 +165,7 @@ def zscore(x) :
     X = np.squeeze(x).astype(float)
     if X.ndim != 1 :
         return None
-    return (X - np.mean(X)) / np.std(X)
+    return (X - ts.mean(X)) / ts.std(X)
 
 def zscore_ori(x, x_ori) :   
     if type(x).__module__ != np.__name__ or type(x_ori).__module__ != np.__name__ :
@@ -173,7 +176,7 @@ def zscore_ori(x, x_ori) :
     X_ori = x_ori.astype(float)
     if X.ndim != 1 or X_ori.ndim != 1 :
         return None
-    return (X - np.mean(X_ori)) / np.std(X_ori)
+    return (X - ts.mean(X_ori)) / ts.std(X_ori)
 
 def precision_score_(y, y_hat, pos_label=1) :
     if type(y).__module__ != np.__name__ or type(y_hat).__module__ != np.__name__ :
